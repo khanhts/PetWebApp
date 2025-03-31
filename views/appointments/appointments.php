@@ -61,45 +61,81 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var calendarEl = document.getElementById("calendar");
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: "dayGridMonth",
-                headerToolbar: {
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay"
-                },
-                events: "load_appointments.php", // Load danh sách lịch hẹn từ server
-                
-                // ✅ Khi nhấn vào ngày, mở modal đặt lịch
-                dateClick: function (info) {
-                    $("#appointment_date").val(info.dateStr); // Gán ngày vào form
-                    $("#appointmentModal").modal("show");
-                }
-            });
-            calendar.render();
+document.addEventListener("DOMContentLoaded", async function () {
+    var calendarEl = document.getElementById("calendar");
+    var disabledDates = await fetchDisabledDates(); // Lấy danh sách ngày bị chặn
+    var today = new Date().toISOString().split("T")[0];
 
-            // ✅ Gửi form bằng AJAX, không cần load lại trang
-            $("#appointmentForm").submit(function (e) {
-                e.preventDefault(); // Ngăn reload trang
-                
-                $.ajax({
-                url: "load_appointment.php", // Đảm bảo file đúng với API xử lý lịch hẹn
-                type: "POST",
-                data: $(this).serialize(),
-                success: function (response) {
-                    alert("Đặt lịch thành công!");
-                    $("#appointmentModal").modal("hide");
-                    calendar.refetchEvents(); // Cập nhật lại lịch
-                },
-                error: function () {
-                    alert("Lỗi khi đặt lịch, vui lòng thử lại!");
-                }
-            });
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        headerToolbar: {
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay"
+        },
+        locale: "vi",
+        selectable: true,
+        editable: false,
+        eventLimit: true,
+        events: "load_appointments.php",
 
-            });
+        // ✅ Xử lý khi chọn ngày
+        dateClick: function (info) {
+            const selectedDate = info.dateStr;
+
+            if (selectedDate < today) {
+                alert("❌ Không thể đặt lịch vào ngày trong quá khứ!");
+                return;
+            }
+
+            if (disabledDates.includes(selectedDate)) {
+                alert("❌ Ngày này đã đầy lịch hoặc là ngày lễ, vui lòng chọn ngày khác!");
+                return;
+            }
+
+            $("#appointment_date").val(selectedDate);
+            $("#appointmentModal").modal("show");
+        }
+    });
+
+    calendar.render();
+
+    // ✅ Xử lý gửi form đặt lịch bằng AJAX
+    $("#appointmentForm").submit(function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: "load_appointments.php", // ✅ Đồng bộ API
+            type: "POST",
+            data: $(this).serialize(),
+            success: function () {
+                alert("✅ Đặt lịch thành công!");
+                $("#appointmentModal").modal("hide");
+                $("#appointmentForm")[0].reset();
+                calendar.refetchEvents(); // ✅ Cập nhật lại lịch sau khi đặt
+            },
+            error: function () {
+                alert("❌ Lỗi khi đặt lịch, vui lòng thử lại!");
+            }
         });
-    </script>
+    });
+});
+
+/**
+ * 🛑 Lấy danh sách ngày bị khóa (ngày lễ + ngày đã đầy lịch)
+ */
+async function fetchDisabledDates() {
+    const holidays = ["2025-01-01", "2025-04-30", "2025-05-01", "2025-09-02"];
+
+    try {
+        const response = await fetch("index.php?controller=appointment&action=getDisabledDates");
+        const serverDisabledDates = await response.json();
+        return [...new Set([...serverDisabledDates, ...holidays])];
+    } catch (error) {
+        console.error("❌ Lỗi khi tải danh sách ngày bị chặn:", error);
+        return holidays;
+    }
+}
+</script>
 </body>
 </html>

@@ -10,6 +10,26 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (dateInput) {
         await setupDatePicker(dateInput, timeSelect);
     }
+
+    // ✅ Xử lý gửi form đặt lịch bằng AJAX
+    $("#appointmentForm").submit(function (e) {
+        e.preventDefault(); // Ngăn reload trang
+
+        $.ajax({
+            url: "index.php?controller=appointment&action=saveAppointment",
+            type: "POST",
+            data: $(this).serialize(),
+            success: function (response) {
+                alert("✅ Đặt lịch thành công!");
+                $("#appointmentModal").modal("hide");
+                $("#appointmentForm")[0].reset(); // Reset form
+                calendar.refetchEvents(); // Cập nhật lại lịch
+            },
+            error: function () {
+                alert("❌ Lỗi khi đặt lịch, vui lòng thử lại!");
+            }
+        });
+    });
 });
 
 /**
@@ -23,8 +43,8 @@ async function setupCalendar(dateInput, timeSelect) {
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: "dayGridMonth",
         locale: "vi",
-        selectable: true, // ✅ Cho phép chọn ngày
-        editable: false, // Không cho phép kéo thả
+        selectable: true,
+        editable: false,
         eventLimit: true,
         events: async function (fetchInfo, successCallback, failureCallback) {
             try {
@@ -59,6 +79,7 @@ async function setupCalendar(dateInput, timeSelect) {
             if (dateInput) {
                 dateInput.value = selectedDate;
                 await loadAvailableTimes(selectedDate, timeSelect);
+                $("#appointmentModal").modal("show");
             }
         }
     });
