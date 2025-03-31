@@ -1,0 +1,8 @@
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^appointments/detail/([0-9]+)$ index.php?controller=appointments&action=detail&id=$1 [L,QSA]
+RewriteRule ^appointments/cancel/([0-9]+)$ index.php?controller=appointments&action=cancel&id=$1 [L,QSA]
+RewriteRule ^customers/ids$ index.php?controller=customers&action=listCustomerIds [L,QSA]
+RewriteRule ^appointments$ index.php?controller=appointments&action=index [L,QSA]
+
