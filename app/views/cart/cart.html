@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giỏ hàng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 p-6">
+    <header class="bg-blue-600 text-white text-center py-4 text-xl font-semibold flex justify-between px-6">
+      <a href="/CART/app/views/product/list.php" class="bg-white text-blue-600 py-2 px-4 rounded">⬅ Quay lại</a>
+      <span>Giỏ hàng của bạn</span>
+    </header>
+
+    <section class="max-w-4xl mx-auto my-6 bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold mb-4">Sản phẩm trong giỏ</h2>
+      <div id="cart-items" class="space-y-4">
+        </div>
+      <div class="mt-6 border-t pt-4">
+        <p class="text-lg font-semibold text-right">
+          Tổng tiền: <span id="total-price" class="text-red-600">0</span> VND
+        </p>
+      </div>
+    </section>
+
+    <section class="max-w-4xl mx-auto my-6 bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold mb-4">Thông tin đặt hàng</h2>
+        <form id="customer-info-form" class="space-y-4">
+            <div>
+                <label for="customer-name" class="block text-sm font-medium text-gray-700">Họ và tên <span class="text-red-500">*</span></label>
+                <input type="text" id="customer-name" name="customer_name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="customer-phone" class="block text-sm font-medium text-gray-700">Số điện thoại <span class="text-red-500">*</span></label>
+                <input type="tel" id="customer-phone" name="customer_phone" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="customer-address" class="block text-sm font-medium text-gray-700">Địa chỉ nhận hàng (tùy chọn)</label>
+                <textarea id="customer-address" name="customer_address" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+            </div>
+        </form>
+    </section>
+
+     <section class="max-w-4xl mx-auto my-6 text-right">
+        <button id="clear-cart" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded mr-2">
+          Xóa giỏ hàng
+        </button>
+        <button id="place-order-button" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">
+          Xác nhận đặt hàng (Thanh toán tại chỗ)
+        </button>
+    </section>
+
+    <script>
+      function loadCart() {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const cartContainer = document.getElementById("cart-items");
+        const totalPriceEl = document.getElementById("total-price");
+        cartContainer.innerHTML = ""; // Xóa nội dung cũ
+        let total = 0;
+
+        if (cart.length === 0) {
+            cartContainer.innerHTML = '<p class="text-gray-500">Giỏ hàng của bạn đang trống.</p>';
+            totalPriceEl.textContent = '0';
+            document.getElementById('place-order-button').disabled = true; // Vô hiệu hóa nút đặt hàng nếu giỏ trống
+            return; // Dừng hàm nếu giỏ trống
+        } else {
+             document.getElementById('place-order-button').disabled = false; // Kích hoạt lại nút
+        }
+
+        cart.forEach((item, index) => {
+          total += item.price * item.quantity;
+          const div = document.createElement("div");
+          div.className = "border-b pb-4 flex justify-between items-start"; // Cập nhật class
+          div.innerHTML = `
+            <div class="flex-grow pr-4">
+                <h3 class="font-semibold">${item.name}</h3>
+                <p class="text-sm text-gray-500">Đơn giá: ${item.price.toLocaleString()} VND</p>
+                <p class="text-gray-800 font-medium">Thành tiền: ${(item.price * item.quantity).toLocaleString()} VND</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs change-quantity" data-index="${index}" data-change="-1">-</button>
+                    <span class="px-2">${item.quantity}</span>
+                    <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 rounded text-xs change-quantity" data-index="${index}" data-change="1">+</button>
+                </div>
+            </div>
+            <button class="bg-red-100 hover:bg-red-200 text-red-600 py-1 px-3 rounded text-sm remove-item" data-index="${index}">Xóa</button>
+          `;
+          cartContainer.appendChild(div);
+        });
+
+        totalPriceEl.textContent = total.toLocaleString();
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadCart(); // Load giỏ hàng khi trang tải xong
+
+        // Event listener cho các nút trong giỏ hàng (Xóa, +/-)
+        document.getElementById("cart-items").addEventListener("click", (event) => {
+          let cart = JSON.parse(localStorage.getItem("cart")) || [];
+          let cartChanged = false;
+
+          if (event.target.classList.contains("remove-item")) {
+            const index = parseInt(event.target.getAttribute("data-index"));
+            cart.splice(index, 1);
+            cartChanged = true;
+          }
+
+          if (event.target.classList.contains("change-quantity")) {
+            const index = parseInt(event.target.getAttribute("data-index"));
+            const change = parseInt(event.target.getAttribute("data-change"));
+            if (cart[index]) { // Kiểm tra item tồn tại
+                 cart[index].quantity += change;
+                 if (cart[index].quantity < 1) cart[index].quantity = 1; // Số lượng tối thiểu là 1
+                 cartChanged = true;
+            }
+          }
+
+          if (cartChanged) {
+              localStorage.setItem("cart", JSON.stringify(cart));
+              loadCart(); // Tải lại giao diện giỏ hàng
+          }
+        });
+
+        // Event listener cho nút Xóa giỏ hàng
+        document.getElementById("clear-cart").addEventListener("click", () => {
+          if(confirm("Bạn có chắc muốn xóa toàn bộ giỏ hàng?")) {
+              localStorage.removeItem("cart");
+              loadCart(); // Tải lại giao diện giỏ hàng (sẽ hiển thị là trống)
+          }
+        });
+
+        // --- Event listener cho nút Đặt Hàng ---
+        document.getElementById("place-order-button").addEventListener("click", () => {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+            // Lấy thông tin khách hàng
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+            const customerAddress = document.getElementById('customer-address').value.trim();
+
+            // Kiểm tra dữ liệu bắt buộc
+            if (cart.length === 0) {
+                alert("Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi đặt hàng.");
+                return;
+            }
+            if (!customerName || !customerPhone) {
+                alert("Vui lòng nhập đầy đủ Họ tên và Số điện thoại.");
+                // Optional: focus vào trường bị thiếu
+                if (!customerName) document.getElementById('customer-name').focus();
+                else document.getElementById('customer-phone').focus();
+                return;
+            }
+            // Optional: Thêm kiểm tra định dạng SĐT nếu muốn
+            /*
+            const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/; // Ví dụ regex SĐT Việt Nam
+            if (!phoneRegex.test(customerPhone)) {
+                alert("Số điện thoại không hợp lệ.");
+                document.getElementById('customer-phone').focus();
+                return;
+            }
+            */
+
+
+            // Chuẩn bị dữ liệu gửi đi
+            const orderData = {
+                customer: {
+                    name: customerName,
+                    phone: customerPhone,
+                    address: customerAddress
+                },
+                items: cart, // Gửi cả thông tin id, name, price, quantity từ cart localStorage
+                total: totalPrice
+            };
+
+            // Gửi yêu cầu tạo đơn hàng lên server
+            fetch('/CART/index.php?controller=order&action=create', { // Đảm bảo URL đúng
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => response.json()) // Chuyển response thành JSON
+            .then(data => {
+                if (data.success && data.orderId) {
+                    // Đặt hàng thành công!
+                    alert('Đặt hàng thành công! Mã đơn hàng của bạn là: ' + data.orderId);
+                    // Xóa giỏ hàng ở localStorage
+                    localStorage.removeItem('cart');
+                    // Chuyển hướng đến trang hóa đơn/xác nhận
+                    window.location.href = `/CART/index.php?controller=order&action=invoice&id=${data.orderId}`;
+                } else {
+                    // Có lỗi từ server
+                    alert('Đặt hàng thất bại: ' + (data.message || 'Lỗi không xác định.'));
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi khi gửi yêu cầu đặt hàng:', error);
+                alert('Đã xảy ra lỗi mạng hoặc lỗi xử lý. Vui lòng thử lại.');
+            });
+        });
+
+      }); // Kết thúc DOMContentLoaded
+    </script>
+  </body>
+</html>
