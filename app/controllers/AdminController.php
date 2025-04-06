@@ -27,7 +27,8 @@ class AdminController
             $admin = $this->userModel->getUserByEmail($email);
 
             if ($admin && $admin['role_name'] === 'admin' && password_verify($password, $admin['password'])) {
-                $_SESSION['admin_id'] = $admin['id'];
+                session_unset();
+                $_SESSION['user_id'] = $admin['id'];
                 $_SESSION['role'] = $admin['role_name'];
                 header('Location: /admin/product-management'); // Redirect to the admin dashboard or product management page
                 exit;

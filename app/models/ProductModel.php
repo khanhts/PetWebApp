@@ -13,13 +13,13 @@ class ProductModel
     
     private string $uploadDirSystem;
     
-    private string $uploadDirWeb = '/assets/uploads/images/';
+    private string $uploadDirWeb = '/images/';
 
     public function __construct(PDO $db)
     {
         $this->db = $db;
 
-        $this->uploadDirSystem = $_SERVER['DOCUMENT_ROOT'] . '/assets/uploads/images/';
+        $this->uploadDirSystem = $_SERVER['DOCUMENT_ROOT'] . '/uploads/images/';
     }
 
     // Fetch all products
@@ -63,6 +63,11 @@ class ProductModel
     {
         $filename = uniqid() . '_' . basename($file['name']);
         $targetPath = $this->uploadDirSystem . $filename;
+
+        // Ensure the upload directory exists
+        if (!is_dir($this->uploadDirSystem)) {
+            mkdir($this->uploadDirSystem, 0777, true);
+        }
 
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
             return $this->uploadDirWeb . $filename;
@@ -125,6 +130,36 @@ class ProductModel
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE isDeleted = 0");
         $stmt->execute();
         return (int)$stmt->fetchColumn();
+    }
+
+    public function updateProduct($id, $name, $description, $price, $imagePath = null, $categoryId = null): bool
+    {
+        try {
+            $query = "UPDATE {$this->table_name} 
+                      SET name = :name, description = :description, price = :price, category_id = :category_id";
+
+            // Include image path if a new image is uploaded
+            if ($imagePath) {
+                $query .= ", image_path = :image_path";
+            }
+
+            $query .= " WHERE id = :id";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':name', $name);
+            $stmt->bindParam(':description', $description);
+            $stmt->bindParam(':price', $price);
+            $stmt->bindParam(':category_id', $categoryId);
+            if ($imagePath) {
+                $stmt->bindParam(':image_path', $imagePath);
+            }
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error updating product: " . $e->getMessage());
+            return false;
+        }
     }
 }
 ?>

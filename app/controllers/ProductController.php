@@ -57,7 +57,7 @@ class ProductController
         }
         // Fetch all categories to display in the form
         $categories = $this->categoryModel->getAllCategories();
-        require_once __DIR__ . '/../Views/products/create.php';
+        require_once __DIR__ . '/../Views/admin/product-create.php';
     }
 
     // Handle product creation
@@ -90,12 +90,17 @@ class ProductController
             $imagePath = null;
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $imagePath = $this->productModel->handleImageUpload($_FILES['image']);
+                if (!$imagePath) {
+                    $errors[] = 'Failed to upload the image.';
+                }
+            } elseif (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+                $errors[] = 'Error uploading the image. Please try again.';
             }
 
             // If errors exist, return to form with error messages
             if (!empty($errors)) {
                 // Pass errors to the view
-                require_once __DIR__ . '/../Views/products/create.php';
+                require_once __DIR__ . '/../Views/admin/product-create.php';
                 return;
             }
 
@@ -103,7 +108,7 @@ class ProductController
             $this->productModel->createProduct($name, $description, $price, $imagePath, $categoryId);
 
             // Redirect to products page after creation
-            header('Location: /products');
+            header('Location: /admin/product-management');
             exit;
         } else {
             // If method is not POST, return 405
@@ -114,6 +119,10 @@ class ProductController
 
     public function productManagement()
     {
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: /accessDenied');
+            exit;
+        }
         $productModel = new ProductModel($this->db);
 
         // Get the current page from the query string, default to 1
@@ -133,6 +142,10 @@ class ProductController
 
     public function deleteProduct(int $productId)
     {
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: /accessDenied');
+            exit;
+        }
         $productModel = new ProductModel($this->db);
         $success = $productModel->deleteProductById($productId);
 
@@ -141,6 +154,85 @@ class ProductController
             echo json_encode(['status' => 'success', 'message' => 'Product deleted successfully.']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Failed to delete product.']);
+        }
+    }
+
+    public function edit($id)
+    {
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: /accessDenied');
+            exit;
+        }
+        // Ensure the user is an admin
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: /accessDenied');
+            exit;
+        }
+
+        // Fetch the product details
+        $product = $this->productModel->getProductById($id);
+        if (!$product) {
+            echo "Product not found.";
+            exit;
+        }
+
+        // Fetch categories for the dropdown
+        $categories = $this->categoryModel->getAllCategories();
+
+        // Load the edit view
+        require_once __DIR__ . '/../views/admin/product-edit.php';
+    }
+
+    public function update($id)
+    {
+        // Ensure the user is an admin
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: /accessDenied');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Retrieve POST data
+            $name = $_POST['name'] ?? '';
+            $description = $_POST['description'] ?? '';
+            $price = $_POST['price'] ?? '';
+            $categoryId = $_POST['category_id'] ?? null;
+
+            // Validate form fields
+            $errors = [];
+            if (empty($name)) {
+                $errors[] = 'Product name is required.';
+            }
+            if (empty($description)) {
+                $errors[] = 'Product description is required.';
+            }
+            if (!is_numeric($price)) {
+                $errors[] = 'Product price must be a valid number.';
+            }
+
+            // Handle image upload
+            $imagePath = null;
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $imagePath = $this->productModel->handleImageUpload($_FILES['image']);
+                if (!$imagePath) {
+                    $errors[] = 'Failed to upload the image.';
+                }
+            }
+
+            // If there are errors, reload the edit form with errors
+            if (!empty($errors)) {
+                $product = $this->productModel->getProductById($id);
+                $categories = $this->categoryModel->getAllCategories();
+                require_once __DIR__ . '/../views/admin/product-edit.php';
+                return;
+            }
+
+            // Update the product
+            $this->productModel->updateProduct($id, $name, $description, $price, $imagePath, $categoryId);
+
+            // Redirect to product management
+            header('Location: /admin/product-management');
+            exit;
         }
     }
 }

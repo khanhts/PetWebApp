@@ -76,11 +76,15 @@ if ($requestUri === '' || $requestUri === 'home') {
 } elseif (preg_match('/^admin\/product\/delete\/(\d+)$/', $requestUri, $matches)) {
     $controller = new ProductController();
     $controller->deleteProduct((int)$matches[1]);
-}
-elseif ($requestUri === 'accessDenied') {
+} elseif (preg_match('/^admin\/product\/edit\/(\d+)$/', $requestUri, $matches)) {
+    $controller = new ProductController();
+    $controller->edit((int)$matches[1]);
+} elseif (preg_match('/^admin\/product\/update\/(\d+)$/', $requestUri, $matches)) {
+    $controller = new ProductController();
+    $controller->update((int)$matches[1]);
+} elseif ($requestUri === 'accessDenied') {
     require_once __DIR__ . '/../app/views/accessDenied.php';
-}
-else {
+} else {
     http_response_code(404);
     echo '404 - Not Found';
 }
