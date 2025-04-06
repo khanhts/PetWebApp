@@ -27,7 +27,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="index.php?controller=appointment&action=index">Lịch Hẹn</a></li>
-                <li class="nav-item"><a class="nav-link" href="index.php?controller=appointment&action=create">Đặt Lịch</a></li>
+            
         </div>
     </div>
 </nav>
