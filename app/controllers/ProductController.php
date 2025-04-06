@@ -111,5 +111,37 @@ class ProductController
             echo 'Method Not Allowed';
         }
     }
+
+    public function productManagement()
+    {
+        $productModel = new ProductModel($this->db);
+
+        // Get the current page from the query string, default to 1
+        $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $itemsPerPage = 10; // Number of products per page
+        $offset = ($currentPage - 1) * $itemsPerPage;
+
+        // Fetch products for the current page
+        $products = $productModel->getPaginatedProducts($itemsPerPage, $offset);
+
+        // Get the total number of products
+        $totalProducts = $productModel->getTotalProducts();
+        $totalPages = ceil($totalProducts / $itemsPerPage);
+
+        require_once __DIR__ . '/../views/admin/product-management.php';
+    }
+
+    public function deleteProduct(int $productId)
+    {
+        $productModel = new ProductModel($this->db);
+        $success = $productModel->deleteProductById($productId);
+
+        header('Content-Type: application/json');
+        if ($success) {
+            echo json_encode(['status' => 'success', 'message' => 'Product deleted successfully.']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to delete product.']);
+        }
+    }
 }
 ?>

@@ -7,6 +7,8 @@ use App\Controllers\HomeController;
 use App\Controllers\UserController;
 use App\Controllers\CartController;
 use App\Controllers\AppointmentController;
+use App\Controllers\AdminController;
+use App\Models\ProductModel;
 
 // Parse the URL
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -34,16 +36,10 @@ if ($requestUri === '' || $requestUri === 'home') {
 } elseif ($requestUri === 'products') {
     $controller = new ProductController();
     $controller->index(); // Handles product listing and search
-} elseif ($requestUri === 'products/create') {
-    $controller = new ProductController();
-    $controller->create();
 } elseif (preg_match('#^products/(\d+)$#', $requestUri, $matches)) {
     $productId = (int)$matches[1];
     $controller = new ProductController();
     $controller->show($productId);
-} elseif ($requestUri === 'products/store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $controller = new ProductController();
-    $controller->store();
 } elseif ($requestUri === 'cart') {
     $controller = new CartController();
     $controller->index();
@@ -56,14 +52,30 @@ if ($requestUri === '' || $requestUri === 'home') {
 } elseif ($requestUri === 'services'){
     $controller = new AppointmentController();
     $controller->index();
-}
-elseif ($requestUri === 'appointment/getDisabledDates'){
+} elseif ($requestUri === 'appointment/getDisabledDates'){
     $controller = new AppointmentController();
     $controller->getDisabledDates();
-}
-elseif ($requestUri === 'appointment/create'){
+} elseif ($requestUri === 'appointment/create'){
     $controller = new AppointmentController();
     $controller->add();
+} elseif ($requestUri === 'admin/login') {
+    $controller = new AdminController();
+    $controller->login();
+} elseif ($requestUri === 'admin/logout') {
+    $controller = new AdminController();
+    $controller->logout();
+} elseif ($requestUri === 'admin/product/create' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $controller = new ProductController();
+    $controller->create(); // Show the product creation form
+} elseif ($requestUri === 'admin/product/store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new ProductController();
+    $controller->store(); // Handle the product creation form submission
+} elseif ($requestUri === 'admin/product-management') {
+    $controller = new ProductController();
+    $controller->productManagement();
+} elseif (preg_match('/^admin\/product\/delete\/(\d+)$/', $requestUri, $matches)) {
+    $controller = new ProductController();
+    $controller->deleteProduct((int)$matches[1]);
 }
 elseif ($requestUri === 'accessDenied') {
     require_once __DIR__ . '/../app/views/accessDenied.php';

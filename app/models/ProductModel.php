@@ -25,14 +25,14 @@ class ProductModel
     // Fetch all products
     public function getAllProducts(): array
     {
-        $stmt = $this->db->prepare("SELECT * FROM {$this->table_name}");
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table_name} WHERE isDeleted = 0");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getProductById(int $id): ?array
     {
-        $stmt = $this->db->prepare("SELECT * FROM {$this->table_name} WHERE id = :id");
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table_name} WHERE id = :id AND isDeleted = 0");
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -76,14 +76,55 @@ class ProductModel
     public function getProducts(string $search = ''): array
     {
         if (!empty($search)) {
-            $stmt = $this->db->prepare("SELECT * FROM {$this->table_name} WHERE name LIKE :search OR description LIKE :search");
+            $stmt = $this->db->prepare("SELECT * FROM {$this->table_name} WHERE (name LIKE :search OR description LIKE :search) AND isDeleted = 0");
             $searchTerm = '%' . $search . '%';
             $stmt->bindParam(':search', $searchTerm, PDO::PARAM_STR);
         } else {
-            $stmt = $this->db->prepare("SELECT * FROM {$this->table_name}");
+            $stmt = $this->db->prepare("SELECT * FROM {$this->table_name} WHERE isDeleted = 0");
         }
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllProductsWithCategory(): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT p.*, c.name AS category_name
+            FROM product p
+            LEFT JOIN category c ON p.category_id = c.id
+            WHERE p.isDeleted = 0
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function deleteProductById(int $id): bool
+    {
+        $stmt = $this->db->prepare("UPDATE {$this->table_name} SET isDeleted = 1 WHERE id = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function getPaginatedProducts(int $limit, int $offset): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT p.*, c.name AS category_name
+            FROM product p
+            LEFT JOIN category c ON p.category_id = c.id
+            WHERE p.isDeleted = 0
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getTotalProducts(): int
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE isDeleted = 0");
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
     }
 }
 ?>
