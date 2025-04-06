@@ -31,7 +31,7 @@ class UserModel {
     // Get a user by email
     public function getUserByEmail(string $email): ?array {
         $stmt = $this->conn->prepare("
-            SELECT users.id, users.email, users.password, users.fullname, role.name AS role_name
+            SELECT users.id, users.email, users.password, users.fullname, users.phone, users.address,role.name AS role_name
             FROM {$this->table_name}
             INNER JOIN role ON users.role = role.id
             WHERE users.email = :email

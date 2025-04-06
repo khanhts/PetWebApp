@@ -65,6 +65,9 @@ elseif ($requestUri === 'appointment/create'){
     $controller = new AppointmentController();
     $controller->add();
 }
+elseif ($requestUri === 'accessDenied') {
+    require_once __DIR__ . '/../app/views/accessDenied.php';
+}
 else {
     http_response_code(404);
     echo '404 - Not Found';

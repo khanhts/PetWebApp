@@ -51,6 +51,10 @@ class ProductController
     // Show create product form
     public function create()
     {
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: /accessDenied');
+            exit;
+        }
         // Fetch all categories to display in the form
         $categories = $this->categoryModel->getAllCategories();
         require_once __DIR__ . '/../Views/products/create.php';
@@ -59,6 +63,10 @@ class ProductController
     // Handle product creation
     public function store()
     {
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: /accessDenied');
+            exit;
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Retrieve POST data
             $name = $_POST['name'] ?? '';

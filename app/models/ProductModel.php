@@ -13,11 +13,13 @@ class ProductModel
     
     private string $uploadDirSystem;
     
-    private string $uploadDirWeb = '/webbanhang/public/uploads/images/products/'; // *** KIỂM TRA KỸ ĐƯỜNG DẪN NÀY ***
+    private string $uploadDirWeb = '/assets/uploads/images/';
 
     public function __construct(PDO $db)
     {
         $this->db = $db;
+
+        $this->uploadDirSystem = $_SERVER['DOCUMENT_ROOT'] . '/assets/uploads/images/';
     }
 
     // Fetch all products
