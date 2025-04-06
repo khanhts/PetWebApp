@@ -71,28 +71,20 @@ class UserController {
     // Handle login logic
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Get form data
             $email = $_POST['email'];
             $password = $_POST['password'];
-
-            // Fetch user by email
             $user = $this->userModel->getUserByEmail($email);
 
-            if ($user && password_verify($password, $user['password'])) {
-                // Start session and save user info
+            if ($user && $user['role_name'] !== 'admin' && password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['fullname'] = $user['fullname'];
                 $_SESSION['phone'] = $user['phone'];
                 $_SESSION['address'] = $user['address'];
-                $_SESSION['role'] = $user['role.name']; 
-
-                // Redirect to a secure page
+                $_SESSION['role'] = $user['role_name']; 
                 header("Location: /");
             } else {
                 $_SESSION['error_message'] = "Invalid email or password";
-
-                // Redirect back to login
                 header("Location: /login");
                 exit;
             }

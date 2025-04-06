@@ -16,14 +16,8 @@ class CategoryModel
 
     public function getAllCategories(): array
     {
-        try {
-            $query = "SELECT id, name FROM " . $this->table_name . " ORDER BY name ASC";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_OBJ);
-        } catch (PDOException $e) {
-            error_log("Error fetching categories: " . $e->getMessage());
-            return [];
-        }
+        $stmt = $this->conn->prepare("SELECT id, name FROM category");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

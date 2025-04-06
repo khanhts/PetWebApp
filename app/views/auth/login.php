@@ -6,7 +6,6 @@
     <title>Login</title>
     <link rel="stylesheet" href="/assets/css/login.css">
     <script>
-        // JavaScript to remove the error message on input focus
         document.addEventListener('DOMContentLoaded', function () {
             const inputs = document.querySelectorAll('#email, #password');
             const errorMessage = document.querySelector('.error-message');

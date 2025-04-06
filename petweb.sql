@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 06, 2025 at 07:00 PM
+-- Generation Time: Apr 07, 2025 at 01:13 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -92,32 +92,36 @@ CREATE TABLE `product` (
   `description` text DEFAULT NULL,
   `price` decimal(10,2) NOT NULL,
   `image_path` varchar(255) DEFAULT NULL,
-  `category_id` int(11) NOT NULL
+  `category_id` int(11) NOT NULL,
+  `isDeleted` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `product`
 --
 
-INSERT INTO `product` (`id`, `name`, `description`, `price`, `image_path`, `category_id`) VALUES
-(1, 'Dog Food - Chicken Flavor', 'Nutritious chicken-flavored food for adult dogs, rich in protein and vitamins.', 29.99, '/images/dog_food_chicken.png', 1),
-(2, 'Cat Food - Salmon Delight', 'Delicious salmon-flavored food for adult cats, rich in Omega-3 fatty acids.', 24.99, '/images/cat_food_salmon.png', 2),
-(3, 'Bird Food - Mixed Seeds', 'A variety of seeds suitable for all bird species, providing balanced nutrition.', 15.99, '/images/bird_food_seeds.png', 3),
-(4, 'Dog Chew Toy - Bone', 'Durable chew toy shaped like a bone, perfect for dogs who love to chew.', 12.50, '/images/dog_chew_bone.png', 4),
-(5, 'Cat Scratching Post', 'A sturdy scratching post to help your cat sharpen its claws and stretch.', 19.99, '/images/cat_scratching_post.png', 5),
-(6, 'Bird Swing', 'A colorful swing designed for birds to enjoy while they perch and play.', 8.99, '/images/bird_swing.png', 6),
-(7, 'Dog Shampoo - Lavender Scent', 'Gentle lavender-scented shampoo that cleans and soothes your dog\'s skin.', 14.99, '/images/dog_shampoo_lavender.png', 7),
-(8, 'Cat Brush - Self Cleaning', 'A self-cleaning brush to remove loose fur from your cat without making a mess.', 18.99, '/images/cat_brush_self_cleaning.png', 8),
-(9, 'Bird Feather Care', 'Specialized product to help maintain your bird\'s feathers and overall health.', 22.50, '/images/bird_feather_care.png', 9),
-(10, 'Dog Flea & Tick Treatment', 'A monthly treatment to prevent fleas and ticks in dogs of all sizes.', 39.99, '/images/dog_flea_tick.png', 10),
-(11, 'Cat Supplement - Hairball Control', 'A supplement designed to reduce hairball formation in cats.', 14.99, '/images/cat_supplement_hairball.png', 11),
-(12, 'Bird Vitamin Drops', 'Essential vitamins and minerals for your bird to stay healthy and strong.', 10.99, '/images/bird_vitamin_drops.png', 12),
-(13, 'Dog Leash - Reflective', 'A reflective dog leash for safe walks at night.', 16.50, '/images/dog_leash_reflective.png', 13),
-(14, 'Cat Collar - Breakaway', 'A breakaway collar for cats with a cute bowtie design.', 8.99, '/images/cat_collar_breakaway.png', 14),
-(15, 'Bird Cage - Large', 'A spacious bird cage for larger birds like parrots, with plenty of perches.', 89.99, '/images/bird_cage_large.png', 15),
-(16, 'Dog Bed - Memory Foam', 'A comfortable memory foam dog bed that supports joints and provides ultimate comfort.', 49.99, '/images/dog_bed_memory_foam.png', 16),
-(17, 'Cat Bed - Heated', 'A heated cat bed that keeps your pet warm and cozy during the winter months.', 39.99, '/images/cat_bed_heated.png', 17),
-(18, 'Bird Cage - Small', 'A smaller bird cage perfect for smaller bird species or as a travel cage.', 39.99, '/images/bird_cage_small.png', 18);
+INSERT INTO `product` (`id`, `name`, `description`, `price`, `image_path`, `category_id`, `isDeleted`) VALUES
+(1, 'Dog Food - Chicken Flavor', 'Nutritious chicken-flavored food for adult dogs, rich in protein and vitamins.', 29.99, '/images/dog_food_chicken.png', 1, 0),
+(2, 'Cat Food - Salmon Delight', 'Delicious salmon-flavored food for adult cats, rich in Omega-3 fatty acids.', 24.99, '/images/cat_food_salmon.png', 2, 0),
+(3, 'Bird Food - Mixed Seeds', 'A variety of seeds suitable for all bird species, providing balanced nutrition.', 15.99, '/images/bird_food_seeds.png', 3, 0),
+(4, 'Dog Chew Toy - Bone', 'Durable chew toy shaped like a bone, perfect for dogs who love to chew.', 12.50, '/images/dog_chew_bone.png', 4, 0),
+(5, 'Cat Scratching Post', 'A sturdy scratching post to help your cat sharpen its claws and stretch.', 19.99, '/images/cat_scratching_post.png', 5, 0),
+(6, 'Bird Swing', 'A colorful swing designed for birds to enjoy while they perch and play.', 8.99, '/images/bird_swing.png', 6, 0),
+(7, 'Dog Shampoo - Lavender Scent', 'Gentle lavender-scented shampoo that cleans and soothes your dog\'s skin.', 14.99, '/images/dog_shampoo_lavender.png', 7, 0),
+(8, 'Cat Brush - Self Cleaning', 'A self-cleaning brush to remove loose fur from your cat without making a mess.', 18.99, '/images/cat_brush_self_cleaning.png', 8, 0),
+(9, 'Bird Feather Care', 'Specialized product to help maintain your bird\'s feathers and overall health.', 22.50, '/images/bird_feather_care.png', 9, 0),
+(10, 'Dog Flea & Tick Treatment', 'A monthly treatment to prevent fleas and ticks in dogs of all sizes.', 39.99, '/images/dog_flea_tick.png', 10, 0),
+(11, 'Cat Supplement - Hairball Control', 'A supplement designed to reduce hairball formation in cats.', 14.99, '/images/cat_supplement_hairball.png', 11, 0),
+(12, 'Bird Vitamin Drops', 'Essential vitamins and minerals for your bird to stay healthy and strong.', 10.99, '/images/bird_vitamin_drops.png', 12, 0),
+(13, 'Dog Leash - Reflective', 'A reflective dog leash for safe walks at night.', 16.50, '/images/dog_leash_reflective.png', 13, 0),
+(14, 'Cat Collar - Breakaway', 'A breakaway collar for cats with a cute bowtie design.', 8.99, '/images/cat_collar_breakaway.png', 14, 0),
+(15, 'Bird Cage - Large', 'A spacious bird cage for larger birds like parrots, with plenty of perches.', 89.99, '/images/bird_cage_large.png', 15, 0),
+(16, 'Dog Bed - Memory Foam', 'A comfortable memory foam dog bed that supports joints and provides ultimate comfort.', 49.99, '/images/dog_bed_memory_foam.png', 16, 0),
+(17, 'Cat Bed - Heated', 'A heated cat bed that keeps your pet warm and cozy during the winter months.', 39.99, '/images/cat_bed_heated.png', 17, 0),
+(18, 'Bird Cage - Small', 'A smaller bird cage perfect for smaller bird species or as a travel cage.', 39.99, '/images/bird_cage_small.png', 18, 0),
+(19, 'Cat\'s Brush Pro', 'A Premium self-cleaning brush to remove loose fur from your cat.', 20.00, NULL, 8, 0),
+(20, 'Cat Brush Pro', 'Premium brush for your cat', 20.00, '/images/67f3044aa827c_cat_brush_self_cleaning.png', 8, 0),
+(21, 'Brush Cat', 'Brush your cat', 20.00, '/images/67f304c8e32e9_cat_brush_self_cleaning.png', 8, 1);
 
 -- --------------------------------------------------------
 
@@ -147,7 +151,8 @@ INSERT INTO `receipt` (`id`, `user_id`, `total_price`, `purchase_date`, `payment
 (7, 1, 70.97, '2025-04-06 16:42:12', 'pending'),
 (8, 1, 40.98, '2025-04-06 16:44:42', 'pending'),
 (9, 1, 40.98, '2025-04-06 16:45:27', 'pending'),
-(10, 1, 140.95, '2025-04-06 16:51:04', 'pending');
+(10, 1, 140.95, '2025-04-06 16:51:04', 'pending'),
+(11, 1, 40.98, '2025-04-06 18:29:02', 'pending');
 
 -- --------------------------------------------------------
 
@@ -192,7 +197,9 @@ INSERT INTO `receipt_items` (`id`, `receipt_id`, `product_id`, `quantity`, `pric
 (22, 10, 1, 2, 29.99),
 (23, 10, 2, 1, 24.99),
 (24, 10, 3, 1, 15.99),
-(25, 10, 10, 1, 39.99);
+(25, 10, 10, 1, 39.99),
+(26, 11, 2, 1, 24.99),
+(27, 11, 3, 1, 15.99);
 
 -- --------------------------------------------------------
 
@@ -317,19 +324,19 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `receipt`
 --
 ALTER TABLE `receipt`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `receipt_items`
 --
 ALTER TABLE `receipt_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `role`
