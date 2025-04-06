@@ -1,38 +1,71 @@
 <?php
-// Include the header file
-include 'includes/header.php';
+session_start();
+require_once __DIR__ . '/../vendor/autoload.php';
 
-// Example: Fetch some sample products for the homepage (replace with database queries later)
-$featuredProducts = [
-    ['name' => 'Dog Food', 'description' => 'High-quality food for your dog.', 'price' => '$20', 'image' => 'dog_food.jpg'],
-    ['name' => 'Cat Toys', 'description' => 'Fun and engaging toys for your cat.', 'price' => '$10', 'image' => 'cat_toys.jpg'],
-    ['name' => 'Pet Leash', 'description' => 'Durable leash for walking your pet.', 'price' => '$15', 'image' => 'leash.jpg']
-];
-?>
+use App\Controllers\ProductController;
+use App\Controllers\HomeController;
+use App\Controllers\UserController;
+use App\Controllers\CartController;
+use App\Controllers\AppointmentController;
 
-    <!-- Welcome Message Section -->
-    <section id="welcome" class="container">
-        <h1>Welcome to Pet Paradise!</h1>
-        <p>Your one-stop shop for pet services and products. We provide high-quality pet care services and a wide range of products to keep your pets happy and healthy!</p>
-    </section>
+// Parse the URL
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$requestUri = trim($requestUri, '/');
 
-    <!-- Featured Products Section -->
-    <section id="featured-products" class="container">
-        <h2>Featured Products</h2>
-        <div class="product-list">
-            <?php foreach ($featuredProducts as $product): ?>
-                <div class="product-item">
-                    <img src="assets/images/<?php echo $product['image']; ?>" alt="<?php echo $product['name']; ?>" />
-                    <h3><?php echo $product['name']; ?></h3>
-                    <p><?php echo $product['description']; ?></p>
-                    <p><strong>Price:</strong> <?php echo $product['price']; ?></p>
-                    <a href="product_details.php?product=<?php echo urlencode($product['name']); ?>">View Details</a>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </section>
-
-<?php
-// Include the footer file
-include 'includes/footer.php';
-?>
+// Simple route matching
+if ($requestUri === '' || $requestUri === 'home') {
+    $controller = new HomeController();
+    $controller->index();
+} elseif ($requestUri === 'signup'&& $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $controller = new UserController();
+    $controller->showSignupForm();
+} elseif ($requestUri === 'signup'&& $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new UserController();
+    $controller->signup();
+} elseif ($requestUri === 'login' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $controller = new UserController();
+    $controller->showLoginForm();
+} elseif ($requestUri === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new UserController();
+    $controller->login();
+} elseif ($requestUri === 'logout') {
+    $controller = new UserController();
+    $controller->logout();
+} elseif ($requestUri === 'products') {
+    $controller = new ProductController();
+    $controller->index(); // Handles product listing and search
+} elseif ($requestUri === 'products/create') {
+    $controller = new ProductController();
+    $controller->create();
+} elseif (preg_match('#^products/(\d+)$#', $requestUri, $matches)) {
+    $productId = (int)$matches[1];
+    $controller = new ProductController();
+    $controller->show($productId);
+} elseif ($requestUri === 'products/store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new ProductController();
+    $controller->store();
+} elseif ($requestUri === 'cart') {
+    $controller = new CartController();
+    $controller->index();
+} elseif ($requestUri === 'cart/add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new CartController();
+    $controller->addToCart();
+} elseif ($requestUri === 'cart/checkout' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $controller = new CartController();
+    $controller->checkout();
+} elseif ($requestUri === 'services'){
+    $controller = new AppointmentController();
+    $controller->index();
+}
+elseif ($requestUri === 'appointment/getDisabledDates'){
+    $controller = new AppointmentController();
+    $controller->getDisabledDates();
+}
+elseif ($requestUri === 'appointment/create'){
+    $controller = new AppointmentController();
+    $controller->add();
+}
+else {
+    http_response_code(404);
+    echo '404 - Not Found';
+}

@@ -5,6 +5,6 @@ namespace App\Controllers;
 
 class HomeController {
     public function index() {
-        return "Hello from HomeController!";
+        require_once __DIR__ . '/../Views/home/index.php';
     }
 }
