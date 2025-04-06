@@ -58,6 +58,11 @@ $controllerInstance = new $controllerClass();
 if (!method_exists($controllerInstance, $action)) {
     die("Lỗi: Action '$action' không tồn tại trong controller '$controllerClass'.");
 }
+// Route API lấy danh sách ngày bị chặn
+if ($controller === 'appointment' && $action === 'getDisabledDates') {
+    $appointmentController->getDisabledDates();
+}
+
 
 // Gọi action
 $controllerInstance->$action();

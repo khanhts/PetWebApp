@@ -54,12 +54,18 @@
                                 <select name="appointment_time" class="form-control" required>
                                     <option value="">-- Chọn giờ --</option>
                                     <option value="08:00">08:00</option>
+                                    <option value="08:30">08:30</option>
                                     <option value="09:00">09:00</option>
+                                    <option value="09:30">09:30</option>
                                     <option value="10:00">10:00</option>
+                                    <option value="10:30">10:30</option>
                                     <option value="11:00">11:00</option>
                                     <option value="13:00">13:00</option>
+                                    <option value="13:30">13:30</option>
                                     <option value="14:00">14:00</option>
+                                    <option value="14:30">14:30</option>
                                     <option value="15:00">15:00</option>
+                                    <option value="15:30">15:30</option>
                                     <option value="16:00">16:00</option>
                                 </select>
                             </div>
@@ -114,10 +120,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
 
             const count = await getAppointmentCountForDate(selectedDate);
-            if (count >= 5) {
-                alert("❌ Ngày này đã đủ 5 lịch hẹn!");
-                return;
-            }
+                if (count >= 5) {
+                    alert("❌ Ngày này đã đủ 5 lịch hẹn!");
+                    return;
+                }
+
 
             $("#appointment_date").val(selectedDate);
             $("#appointmentModal").modal("show");
@@ -125,6 +132,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
 
     calendar.render();
+
 
     // ✅ Gửi form đặt lịch
     $("#appointmentForm").submit(function (e) {
@@ -137,7 +145,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             alert("❌ Vui lòng chọn giờ hẹn!");
             return;
         }
-
+        
         const appointmentDateTime = `${date} ${time}:00`;
 
         const formData = $(this).serializeArray();
@@ -154,11 +162,14 @@ document.addEventListener("DOMContentLoaded", async function () {
                 calendar.refetchEvents();
             },
             error: function (xhr) {
-                let msg = "❌ Lỗi khi đặt lịch!";
-                try {
-                    msg = xhr.responseJSON.message;
-                } catch {}
-                alert(msg);
+            let msg = "❌ Lỗi khi đặt lịch!";
+            try {
+                const res = JSON.parse(xhr.responseText);
+                if (res.message) msg = res.message;
+            } catch (e) {
+                console.warn("❌ Lỗi phân tích phản hồi:", e);
+            }
+            alert(msg);
             }
         });
     });
@@ -185,7 +196,7 @@ async function fetchDisabledDates() {
  */
 async function getAppointmentCountForDate(date) {
     try {
-        const response = await fetch(`index.php?controller=appointment&action=countByDate&date=${date}`);
+        const response = await fetch(`index.php?controller=appointment&action=countByDate&date=yyyy-mm-dd`);
         const data = await response.json();
         return data.count || 0;
     } catch (error) {

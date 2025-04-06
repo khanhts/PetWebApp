@@ -46,12 +46,12 @@ class AppointmentController {
                 return;
             }
 
-            $existingCount = $this->model->countByDate($dateOnly);
-            if ($existingCount >= 5) {
-                http_response_code(400);
-                echo "❌ Ngày này đã đủ 5 lịch hẹn!";
-                return;
-            }
+            // $existingCount = $this->model->countByDate($dateOnly);
+            // if ($existingCount >= 5) {
+            //     http_response_code(400);
+            //     echo "❌ Ngày này đã đủ 5 lịch hẹn!";
+            //     return;
+            // }
 
             $data = [
                 'pet' => $_POST["pet"],
@@ -80,10 +80,11 @@ class AppointmentController {
             echo json_encode(['count' => 0]);
             return;
         }
-
+    
         $count = $this->model->countByDate($date);
         echo json_encode(['count' => $count]);
     }
+    
 
     // ✅ Trang thông báo đặt lịch thành công
     public function success() {
@@ -93,43 +94,34 @@ class AppointmentController {
     // ✅ Nhận dữ liệu từ form modal (AJAX)
     public function add() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $required = ['pet', 'owner_name', 'phone', 'email', 'appointment_date'];
-            foreach ($required as $field) {
-                if (empty($_POST[$field])) {
-                    http_response_code(400);
-                    echo json_encode(['message' => "Thiếu trường $field"]);
-                    return;
-                }
-            }
-
-            $appointmentDateTime = $_POST["appointment_date"];
-            $dateOnly = substr($appointmentDateTime, 0, 10);
-            $dayOfWeek = date('w', strtotime($dateOnly));
-
-            if ($dayOfWeek == 0 || $dayOfWeek == 6) {
-                http_response_code(400);
-                echo json_encode(['message' => "❌ Không thể đặt lịch vào Thứ 7 và Chủ Nhật!"]);
-                return;
-            }
-
-            $count = $this->model->countByDate($dateOnly);
-            if ($count >= 5) {
-                http_response_code(400);
-                echo json_encode(['message' => "❌ Ngày này đã đủ 5 lịch hẹn!"]);
-                return;
-            }
-
+            $database = new Database();
+            $db = $database->getConnection();
+            $appointment = new Appointment($db);
+    
             $data = [
                 'pet' => $_POST['pet'],
                 'owner_name' => $_POST['owner_name'],
                 'phone' => $_POST['phone'],
                 'email' => $_POST['email'],
-                'appointment_date' => $_POST['appointment_date'],
-                'appointment_time' => $_POST['appointment_time'] ?? null,
-                'reason' => $_POST['reason'] ?? ''
+                'appointment_date' => $_POST['appointment_date'], // yyyy-mm-dd hh:mm:ss
+                'appointment_time' => $_POST['appointment_time'], // hh:mm
+                'reason' => $_POST['reason']
             ];
-
-            if ($this->model->create($data)) {
+    
+            $dateOnly = substr($data['appointment_date'], 0, 10);
+            $timeOnly = $data['appointment_time'];
+    
+            // ❌ Kiểm tra trùng giờ
+            if ($appointment->isTimeSlotTaken($dateOnly, $timeOnly)) {
+                http_response_code(400);
+                echo json_encode(['message' => '❌ Giờ hẹn này đã có người đặt!']);
+                return;
+            }
+    
+            // ✅ Tạo lịch nếu không trùng
+            $result = $appointment->create($data);
+    
+            if ($result) {
                 echo json_encode(['message' => '✅ Đặt lịch thành công']);
             } else {
                 http_response_code(500);
@@ -137,5 +129,36 @@ class AppointmentController {
             }
         }
     }
+
+// ✅ API: Lấy danh sách ngày bị chặn (đã đủ 5 lịch hẹn)
+public function getDisabledDates() {
+    $stmt = $this->model->getAll();
+    $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $dateCounts = [];
+
+    foreach ($appointments as $appointment) {
+        $date = substr($appointment['appointment_date'], 0, 10);
+        if (!isset($dateCounts[$date])) {
+            $dateCounts[$date] = 0;
+        }
+        $dateCounts[$date]++;
+    }
+
+    $disabledDates = [];
+    foreach ($dateCounts as $date => $count) {
+        if ($count >= 5) {
+            $disabledDates[] = $date;
+        }
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($disabledDates);
 }
+
+
+    
+    
+    }
+
 ?>
