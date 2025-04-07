@@ -12,7 +12,7 @@ class AdminController
 
     public function __construct()
     {
-        // Get the DB connection
+        
         $this->db = (new Database())->getConnection();
         $this->userModel = new UserModel($this->db);
     }
@@ -23,14 +23,14 @@ class AdminController
             $email = $_POST['email'];
             $password = $_POST['password'];
 
-            // Check if the user is an admin
+            
             $admin = $this->userModel->getUserByEmail($email);
 
             if ($admin && $admin['role_name'] === 'admin' && password_verify($password, $admin['password'])) {
                 session_unset();
                 $_SESSION['user_id'] = $admin['id'];
                 $_SESSION['role'] = $admin['role_name'];
-                header('Location: /admin/product-management'); // Redirect to the admin dashboard or product management page
+                header('Location: /admin/product-management'); 
                 exit;
             } else {
                 $_SESSION['admin_login_error'] = "Invalid email or password";
@@ -42,8 +42,7 @@ class AdminController
 
     public function logout()
     {
-        session_start();
-        unset($_SESSION['admin_id']);
+        session_unset();
         header('Location: /admin/login');
         exit;
     }

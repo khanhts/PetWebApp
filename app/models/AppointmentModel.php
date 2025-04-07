@@ -11,7 +11,7 @@ class AppointmentModel {
         $this->conn = $db;
     }
 
-    // Tạo lịch hẹn mới
+    
     public function create($data) {
         echo "User ID: " . $data['user_id'];
         $stmt = $this->conn->prepare("
@@ -26,9 +26,20 @@ class AppointmentModel {
         return $stmt->execute();
     }
 
-    public function getAll() {
-        $query = "SELECT * FROM {$this->table_name}";
-        return $this->conn->query($query);
+    public function getAll()
+    {
+        $query = "
+            SELECT 
+                a.*, 
+                u.fullname AS owner_name, 
+                u.email,
+                u.phone
+            FROM {$this->table_name} a
+            LEFT JOIN users u ON a.user_id = u.id
+        ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
     public function countByDate($date) {
@@ -48,25 +59,63 @@ class AppointmentModel {
         return $result['count'] > 0;
     }
 
-public function getDisabledDates() {
-    $query = "
-        SELECT DATE(appointment_date) AS date
-        FROM {$this->table_name}
-        GROUP BY DATE(appointment_date)
-        HAVING COUNT(*) >= 5
-    ";
+    public function getDisabledDates() {
+        $query = "
+            SELECT DATE(appointment_date) AS date
+            FROM {$this->table_name}
+            GROUP BY DATE(appointment_date)
+            HAVING COUNT(*) >= 5
+        ";
 
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute();
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
 
-    $dates = [];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $dates[] = $row['date'];
+        $dates = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $dates[] = $row['date'];
+        }
+
+        return $dates;
     }
 
-    return $dates;
-}
+    public function searchAppointments(string $search): array
+    {
+        $query = "
+            SELECT 
+                a.*, 
+                u.fullname AS owner_name, 
+                u.phone, 
+                u.email, 
+                u.address
+            FROM {$this->table_name} a
+            LEFT JOIN users u ON a.user_id = u.id
+            WHERE u.fullname LIKE :search 
+               OR u.phone LIKE :search 
+               OR u.email LIKE :search
+        ";
+        $stmt = $this->conn->prepare($query);
+        $searchTerm = '%' . $search . '%';
+        $stmt->bindParam(':search', $searchTerm, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-    
-    
+    public function getAppointmentsByUserId(int $userId): array
+    {
+        $query = "
+            SELECT 
+                a.*, 
+                u.fullname AS owner_name, 
+                u.phone, 
+                u.email
+            FROM {$this->table_name} a
+            LEFT JOIN users u ON a.user_id = u.id
+            WHERE a.user_id = :user_id
+            ORDER BY a.appointment_date DESC
+        ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

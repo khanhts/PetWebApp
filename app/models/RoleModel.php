@@ -14,7 +14,7 @@ class RoleModel
         $this->db = $db;
     }
 
-    // Fetch all roles
+    
     public function getAllRoles(): array
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table_name}");
@@ -22,7 +22,7 @@ class RoleModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Fetch a single role by ID
+    
     public function getRoleById(int $id): ?array
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table_name} WHERE id = :id");
@@ -32,7 +32,7 @@ class RoleModel
         return $role ?: null;
     }
 
-    // Fetch a single role by name
+    
     public function getRoleByName(string $name): ?array
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table_name} WHERE name = :name");
@@ -42,7 +42,7 @@ class RoleModel
         return $role ?: null;
     }
 
-    // Create a new role
+    
     public function createRole(string $name, string $description): bool
     {
         $stmt = $this->db->prepare("INSERT INTO {$this->table_name} (name, description) VALUES (:name, :description)");
@@ -51,7 +51,7 @@ class RoleModel
         return $stmt->execute();
     }
 
-    // Update an existing role
+    
     public function updateRole(int $id, string $name, string $description): bool
     {
         $stmt = $this->db->prepare("UPDATE {$this->table_name} SET name = :name, description = :description WHERE id = :id");
@@ -61,7 +61,7 @@ class RoleModel
         return $stmt->execute();
     }
 
-    // Delete a role by ID
+    
     public function deleteRole(int $id): bool
     {
         $stmt = $this->db->prepare("DELETE FROM {$this->table_name} WHERE id = :id");

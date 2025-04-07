@@ -14,14 +14,14 @@ class RoleController
         $this->roleModel = new RoleModel($db);
     }
 
-    // Display all roles
+    
     public function index()
     {
         $roles = $this->roleModel->getAllRoles();
         require_once __DIR__ . '/../views/role/index.php';
     }
 
-    // Show a single role by ID
+    
     public function show(int $id)
     {
         $role = $this->roleModel->getRoleById($id);
@@ -33,13 +33,13 @@ class RoleController
         }
     }
 
-    // Show the form to create a new role
+    
     public function create()
     {
         require_once __DIR__ . '/../views/role/create.php';
     }
 
-    // Store a new role
+    
     public function store()
     {
         $name = $_POST['name'] ?? '';
@@ -53,7 +53,7 @@ class RoleController
         }
     }
 
-    // Show the form to edit an existing role
+    
     public function edit(int $id)
     {
         $role = $this->roleModel->getRoleById($id);
@@ -65,7 +65,7 @@ class RoleController
         }
     }
 
-    // Update an existing role
+    
     public function update(int $id)
     {
         $name = $_POST['name'] ?? '';
@@ -79,7 +79,7 @@ class RoleController
         }
     }
 
-    // Delete a role
+    
     public function delete(int $id)
     {
         $this->roleModel->deleteRole($id);

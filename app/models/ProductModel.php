@@ -22,7 +22,7 @@ class ProductModel
         $this->uploadDirSystem = $_SERVER['DOCUMENT_ROOT'] . '/uploads/images/';
     }
 
-    // Fetch all products
+    
     public function getAllProducts(): array
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->table_name} WHERE isDeleted = 0");
@@ -64,7 +64,7 @@ class ProductModel
         $filename = uniqid() . '_' . basename($file['name']);
         $targetPath = $this->uploadDirSystem . $filename;
 
-        // Ensure the upload directory exists
+        
         if (!is_dir($this->uploadDirSystem)) {
             mkdir($this->uploadDirSystem, 0777, true);
         }
@@ -77,7 +77,7 @@ class ProductModel
         }
     }
 
-    // Fetch products based on search query
+    
     public function getProducts(string $search = ''): array
     {
         if (!empty($search)) {
@@ -138,7 +138,7 @@ class ProductModel
             $query = "UPDATE {$this->table_name} 
                       SET name = :name, description = :description, price = :price, category_id = :category_id";
 
-            // Include image path if a new image is uploaded
+            
             if ($imagePath) {
                 $query .= ", image_path = :image_path";
             }

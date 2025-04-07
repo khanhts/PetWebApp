@@ -13,14 +13,16 @@
         <div class="navbar-container">
             <ul>
                 <li><a href="/">Home</a></li>
-                <li><a href="products">Products</a></li>
+                <li><a href="/products">Products</a></li>
                 <?php
                 if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="services">Services</a></li>
-                    <li><a href="cart">Cart</a></li>
-                    <li class="logout-link"><a href="logout">Logout</a></li>
+                    <li><a href="/services">Services</a></li>
+                    <li><a href="/appointments/me">My Appointments</a></li>
+                    <li><a href="/cart">Cart</a></li>
+                    <li><a href="/receipts/me">My Receipt</a></li>
+                    <li class="logout-link"><a href="/logout">Logout</a></li>
                 <?php else: ?>
-                    <li class="login-link"><a href="login">Login</a></li>
+                    <li class="login-link"><a href="/login">Login</a></li>
                 <?php endif; ?>
             </ul>
         </div>

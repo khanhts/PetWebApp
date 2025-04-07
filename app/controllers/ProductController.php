@@ -14,29 +14,27 @@ class ProductController
 
     public function __construct()
     {
-        // Assuming you have a database connection instance
-        $db = new \PDO('mysql:host=localhost;dbname=petweb;charset=utf8', 'root', '');
-        $this->db = $db;
+        $this->db = (new Database())->getConnection(); 
 
-        // Check if the connection was successful
+        
         if (!$this->db) {
             throw new \RuntimeException('Database connection failed.');
         }
         
-        // Instantiate the models
+        
         $this->productModel = new ProductModel($this->db);
         $this->categoryModel = new CategoryModel($this->db);
     }
 
-    // Display all products or search results
+    
     public function index()
     {
-        $search = $_GET['search'] ?? ''; // Get the search query from the URL
-        $products = $this->productModel->getProducts($search); // Fetch products based on the search query
+        $search = $_GET['search'] ?? ''; 
+        $products = $this->productModel->getProducts($search); 
         require_once __DIR__ . '/../Views/products/index.php';
     }
 
-    // Display single product by ID
+    
     public function show(int $id)
     {
         $product = $this->productModel->getProductById($id);
@@ -48,19 +46,19 @@ class ProductController
         }
     }
 
-    // Show create product form
+    
     public function create()
     {
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             header('Location: /accessDenied');
             exit;
         }
-        // Fetch all categories to display in the form
+        
         $categories = $this->categoryModel->getAllCategories();
         require_once __DIR__ . '/../Views/admin/product-create.php';
     }
 
-    // Handle product creation
+    
     public function store()
     {
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -68,13 +66,13 @@ class ProductController
             exit;
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Retrieve POST data
+            
             $name = $_POST['name'] ?? '';
             $description = $_POST['description'] ?? '';
             $price = $_POST['price'] ?? '';
-            $categoryId = $_POST['category_id'] ?? null; // If you have categories
+            $categoryId = $_POST['category_id'] ?? null; 
 
-            // Validate form fields
+            
             $errors = [];
             if (empty($name)) {
                 $errors[] = 'Product name is required.';
@@ -86,7 +84,7 @@ class ProductController
                 $errors[] = 'Product price must be a valid number.';
             }
 
-            // Handle image upload
+            
             $imagePath = null;
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $imagePath = $this->productModel->handleImageUpload($_FILES['image']);
@@ -97,21 +95,21 @@ class ProductController
                 $errors[] = 'Error uploading the image. Please try again.';
             }
 
-            // If errors exist, return to form with error messages
+            
             if (!empty($errors)) {
-                // Pass errors to the view
+                
                 require_once __DIR__ . '/../Views/admin/product-create.php';
                 return;
             }
 
-            // Create product
+            
             $this->productModel->createProduct($name, $description, $price, $imagePath, $categoryId);
 
-            // Redirect to products page after creation
+            
             header('Location: /admin/product-management');
             exit;
         } else {
-            // If method is not POST, return 405
+            
             http_response_code(405);
             echo 'Method Not Allowed';
         }
@@ -125,15 +123,15 @@ class ProductController
         }
         $productModel = new ProductModel($this->db);
 
-        // Get the current page from the query string, default to 1
+        
         $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $itemsPerPage = 10; // Number of products per page
+        $itemsPerPage = 10; 
         $offset = ($currentPage - 1) * $itemsPerPage;
 
-        // Fetch products for the current page
+        
         $products = $productModel->getPaginatedProducts($itemsPerPage, $offset);
 
-        // Get the total number of products
+        
         $totalProducts = $productModel->getTotalProducts();
         $totalPages = ceil($totalProducts / $itemsPerPage);
 
@@ -163,42 +161,42 @@ class ProductController
             header('Location: /accessDenied');
             exit;
         }
-        // Ensure the user is an admin
+        
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             header('Location: /accessDenied');
             exit;
         }
 
-        // Fetch the product details
+        
         $product = $this->productModel->getProductById($id);
         if (!$product) {
             echo "Product not found.";
             exit;
         }
 
-        // Fetch categories for the dropdown
+        
         $categories = $this->categoryModel->getAllCategories();
 
-        // Load the edit view
+        
         require_once __DIR__ . '/../views/admin/product-edit.php';
     }
 
     public function update($id)
     {
-        // Ensure the user is an admin
+        
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             header('Location: /accessDenied');
             exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Retrieve POST data
+            
             $name = $_POST['name'] ?? '';
             $description = $_POST['description'] ?? '';
             $price = $_POST['price'] ?? '';
             $categoryId = $_POST['category_id'] ?? null;
 
-            // Validate form fields
+            
             $errors = [];
             if (empty($name)) {
                 $errors[] = 'Product name is required.';
@@ -210,7 +208,7 @@ class ProductController
                 $errors[] = 'Product price must be a valid number.';
             }
 
-            // Handle image upload
+            
             $imagePath = null;
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $imagePath = $this->productModel->handleImageUpload($_FILES['image']);
@@ -219,7 +217,7 @@ class ProductController
                 }
             }
 
-            // If there are errors, reload the edit form with errors
+            
             if (!empty($errors)) {
                 $product = $this->productModel->getProductById($id);
                 $categories = $this->categoryModel->getAllCategories();
@@ -227,10 +225,10 @@ class ProductController
                 return;
             }
 
-            // Update the product
+            
             $this->productModel->updateProduct($id, $name, $description, $price, $imagePath, $categoryId);
 
-            // Redirect to product management
+            
             header('Location: /admin/product-management');
             exit;
         }

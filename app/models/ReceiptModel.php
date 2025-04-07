@@ -14,7 +14,7 @@ class ReceiptModel
         $this->db = $db;
     }
 
-    // Create a new receipt
+    
     public function createReceipt(int $userId, float $totalPrice, string $paymentStatus = 'pending'): int
     {
         $stmt = $this->db->prepare("
@@ -26,10 +26,10 @@ class ReceiptModel
         $stmt->bindParam(':payment_status', $paymentStatus);
         $stmt->execute();
 
-        return (int)$this->db->lastInsertId(); // Return the ID of the newly created receipt
+        return (int)$this->db->lastInsertId(); 
     }
 
-    // Add items to a receipt
+    
     public function addReceiptItem(int $receiptId, int $productId, int $quantity, float $price): bool
     {
         $stmt = $this->db->prepare("
@@ -43,37 +43,43 @@ class ReceiptModel
         return $stmt->execute();
     }
 
-    // Get a receipt by ID
-    public function getReceiptById(int $id): ?array
+    
+    public function getReceiptById($receiptId): ?array
     {
-        $stmt = $this->db->prepare("
-            SELECT r.*, u.fullname AS user_name
+        $query = "
+            SELECT 
+                r.*, 
+                u.fullname, 
+                u.email, 
+                u.phone
             FROM {$this->table_name} r
-            INNER JOIN users u ON r.user_id = u.id
-            WHERE r.id = :id
-        ");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            LEFT JOIN users u ON r.user_id = u.id
+            WHERE r.id = :receipt_id
+        ";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':receipt_id', $receiptId, PDO::PARAM_INT);
         $stmt->execute();
-        $receipt = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $receipt ?: null;
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    // Get items for a specific receipt
-    public function getReceiptItems(int $receiptId): array
+    
+    public function getReceiptItems($receiptId): array
     {
-        $stmt = $this->db->prepare("
-            SELECT ri.*, p.name AS product_name
+        $query = "
+            SELECT 
+                ri.*, 
+                p.name AS product_name
             FROM {$this->table_items} ri
-            INNER JOIN product p ON ri.product_id = p.id
+            LEFT JOIN product p ON ri.product_id = p.id
             WHERE ri.receipt_id = :receipt_id
-        ");
+        ";
+        $stmt = $this->db->prepare($query);
         $stmt->bindParam(':receipt_id', $receiptId, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Update payment status of a receipt
+    
     public function updatePaymentStatus(int $receiptId, string $paymentStatus): bool
     {
         $stmt = $this->db->prepare("
@@ -86,14 +92,19 @@ class ReceiptModel
         return $stmt->execute();
     }
 
-    // Get all receipts for a specific user
+    
     public function getReceiptsByUserId(int $userId): array
     {
-        $stmt = $this->db->prepare("
-            SELECT * FROM {$this->table_name}
-            WHERE user_id = :user_id
-            ORDER BY purchase_date DESC
-        ");
+        $query = "
+            SELECT 
+                r.id AS receipt_id, 
+                r.total_price, 
+                r.purchase_date
+            FROM {$this->table_name} r
+            WHERE r.user_id = :user_id
+            ORDER BY r.purchase_date DESC
+        ";
+        $stmt = $this->db->prepare($query);
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
