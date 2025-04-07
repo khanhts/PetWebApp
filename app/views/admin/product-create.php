@@ -26,8 +26,8 @@
             <select name="category_id" required>
                 <option value="">-- Select Category --</option>
                 <?php foreach ($categories as $category): ?>
-                    <option value="<?= htmlspecialchars($category->id) ?>">
-                        <?= htmlspecialchars($category->name) ?>
+                    <option value="<?= htmlspecialchars($category['id']) ?>">
+                        <?= htmlspecialchars($category['name']) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
