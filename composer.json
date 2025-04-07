@@ -1,0 +1,17 @@
+{
+    "name": "tranminhquang/pet-web-app",
+    "autoload": {
+        "psr-4": {
+            "Tranminhquang\\PetWebApp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "quang",
+            "email": "quangminh05062905@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
