@@ -17,7 +17,7 @@ class Database
     {
         $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
         $dotenv->load();
-        // Load environment variables from .env file
+        
 
         $this->host = getenv('DB_HOST');
         $this->dbname = getenv('DB_NAME');

@@ -8,13 +8,14 @@ use App\Controllers\UserController;
 use App\Controllers\CartController;
 use App\Controllers\AppointmentController;
 use App\Controllers\AdminController;
-use App\Models\ProductModel;
+use App\Controllers\CategoryController;
+use App\Controllers\ReceiptController;
 
-// Parse the URL
+
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $requestUri = trim($requestUri, '/');
 
-// Simple route matching
+
 if ($requestUri === '' || $requestUri === 'home') {
     $controller = new HomeController();
     $controller->index();
@@ -35,7 +36,7 @@ if ($requestUri === '' || $requestUri === 'home') {
     $controller->logout();
 } elseif ($requestUri === 'products') {
     $controller = new ProductController();
-    $controller->index(); // Handles product listing and search
+    $controller->index(); 
 } elseif (preg_match('#^products/(\d+)$#', $requestUri, $matches)) {
     $productId = (int)$matches[1];
     $controller = new ProductController();
@@ -66,10 +67,10 @@ if ($requestUri === '' || $requestUri === 'home') {
     $controller->logout();
 } elseif ($requestUri === 'admin/product/create' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $controller = new ProductController();
-    $controller->create(); // Show the product creation form
+    $controller->create(); 
 } elseif ($requestUri === 'admin/product/store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $controller = new ProductController();
-    $controller->store(); // Handle the product creation form submission
+    $controller->store(); 
 } elseif ($requestUri === 'admin/product-management') {
     $controller = new ProductController();
     $controller->productManagement();
@@ -82,8 +83,38 @@ if ($requestUri === '' || $requestUri === 'home') {
 } elseif (preg_match('/^admin\/product\/update\/(\d+)$/', $requestUri, $matches)) {
     $controller = new ProductController();
     $controller->update((int)$matches[1]);
+} elseif ($requestUri === 'admin/category-management') {
+    $controller = new CategoryController();
+    $controller->categoryManagement();
+} elseif ($requestUri === 'admin/category/create') {
+    $controller = new CategoryController();
+    $controller->create();
+} elseif ($requestUri === 'admin/category/store') {
+    $controller = new CategoryController();
+    $controller->store();
+} elseif (preg_match('/^admin\/category\/edit\/(\d+)$/', $requestUri, $matches)) {
+    $controller = new CategoryController();
+    $controller->edit((int)$matches[1]);
+} elseif (preg_match('/^admin\/category\/update\/(\d+)$/', $requestUri, $matches)) {
+    $controller = new CategoryController();
+    $controller->update((int)$matches[1]);
+} elseif (preg_match('/^admin\/category\/delete\/(\d+)$/', $requestUri, $matches)) {
+    $controller = new CategoryController();
+    $controller->delete((int)$matches[1]);
 } elseif ($requestUri === 'accessDenied') {
     require_once __DIR__ . '/../app/views/accessDenied.php';
+} elseif ($requestUri === 'admin/appointments/manage') {
+    $controller = new AppointmentController();
+    $controller->manage();
+} elseif ($requestUri === 'appointments/me') {
+    $controller = new AppointmentController();
+    $controller->myAppointments();
+} elseif ($requestUri === 'receipts/me') {
+    $controller = new ReceiptController();
+    $controller->myReceipts();
+} elseif (preg_match('/^receipts\/details\/(\d+)$/', $requestUri, $matches)) {
+    $controller = new ReceiptController();
+    $controller->receiptDetails((int)$matches[1]);
 } else {
     http_response_code(404);
     echo '404 - Not Found';

@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <h1>Access Denied</h1>
-        <p>You do not have permission to access this page. User <?php echo($_SESSION['fullname'])?> current role is <?php echo($_SESSION['role'])?></p>
+        <p>You do not have permission to access this page.</p>
         <a href="/" class="button">Go to Homepage</a>
     </div>
 </body>

@@ -14,10 +14,10 @@ class UserController {
     private ?\PDO $db = null; 
 
     public function __construct() {
-         // Get the DB connection
+         
          $this->db = (new Database())->getConnection();
 
-         // Check if the connection was successful
+         
          if (!$this->db) {
              throw new \RuntimeException('Database connection failed.');
          }
@@ -25,12 +25,12 @@ class UserController {
         $this->roleModel = new RoleModel($this->db);
     }
 
-    // Show the signup form
+    
     public function showSignupForm() {
         include_once __DIR__ . '/../views/auth/signup.php';
     }
 
-    // Handle signup logic
+    
     public function signup() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fullname = $_POST['fullname'];
@@ -38,17 +38,17 @@ class UserController {
             $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
             $phone = $_POST['phone'];
             $address = $_POST['address'];
-            $role = $this->roleModel->getRoleByName('admin');
+            $role = $this->roleModel->getRoleByName('user');
             if ($role) {
                 $roleId = $role['id'];
             } else {
-                // Handle the case where the role is not found
+                
                 $errorMessage = "Role not found.";
                 include_once __DIR__ . '/../views/auth/signup.php';
                 return;
             }
 
-            // Call UserModel to create a new user
+            
             $result = $this->userModel->createUser($fullname, $email, $password, $phone, $address, $roleId);
 
             if ($result) {
@@ -61,14 +61,14 @@ class UserController {
         }
     }
 
-    // Show the login form
+    
     public function showLoginForm() {
-        $errorMessage = $_SESSION['error_message'] ?? ''; // Retrieve error message
-        unset($_SESSION['error_message']); // Clear the error message
+        $errorMessage = $_SESSION['error_message'] ?? ''; 
+        unset($_SESSION['error_message']); 
         include_once __DIR__ . '/../views/auth/login.php';
     }
 
-    // Handle login logic
+    
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'];
@@ -91,7 +91,7 @@ class UserController {
         }
     }
 
-    // Logout the user
+    
     public function logout() {
         session_start();
         session_unset();

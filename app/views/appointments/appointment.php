@@ -18,7 +18,8 @@
     </head>
     <body>
         <div class="container mt-4">
-            <h2 class="text-center">📅 Quản Lý Lịch Hẹn</h2>
+            <h2 class="text-center">📅 Make an appointment</h2>
+            <a href="/">Return</a>
             <div id="calendar"></div>
         </div>
 
@@ -27,23 +28,23 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Đặt Lịch Khám</h5>
+                        <h5 class="modal-title">Appointment</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <form id="appointmentForm">
                             <input type="hidden" id="appointment_date">
                             <div class="mb-3">
-                                <label>Thú Cưng:</label>
+                                <label>Pet info:</label>
                                 <input type="text" name="pet" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <input type="text" name="user_id" class="form-control" hidden value="<?php echo $_SESSION['user_id']; ?>">
                             </div>
                             <div class="mb-3">
-                                <label>Giờ hẹn:</label>
+                                <label>Appointment time:</label>
                                 <select name="appointment_time" class="form-control" required>
-                                    <option value="">-- Chọn giờ --</option>
+                                    <option value="">-- Choose Time--</option>
                                     <option value="08:00">08:00</option>
                                     <option value="08:30">08:30</option>
                                     <option value="09:00">09:00</option>
@@ -61,10 +62,10 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label>Lý Do Khám:</label>
+                                <label>Context:</label>
                                 <textarea name="reason" class="form-control"></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Đặt Lịch</button>
+                            <button type="submit" class="btn btn-primary">Apply</button>
                         </form>
                     </div>
                 </div>
@@ -95,24 +96,24 @@ document.addEventListener("DOMContentLoaded", async function () {
             const jsDate = new Date(selectedDate);
 
             if (selectedDate < today) {
-                alert("❌ Không thể đặt lịch vào ngày trong quá khứ!");
+                alert("❌ Can't choose days in the past!");
                 return;
             }
 
             const dayOfWeek = jsDate.getDay(); // 0 (CN) đến 6 (T7)
             if (dayOfWeek === 0 || dayOfWeek === 6) {
-                alert("❌ Không nhận lịch vào Thứ 7 và Chủ Nhật!");
+                alert("❌ Invalid date!");
                 return;
             }
 
             if (disabledDates.includes(selectedDate)) {
-                alert("❌ Ngày này đã đầy lịch hoặc là ngày lễ, vui lòng chọn ngày khác!");
+                alert("❌ Holiday!");
                 return;
             }
 
             const count = await getAppointmentCountForDate(selectedDate);
                 if (count >= 5) {
-                    alert("❌ Ngày này đã đủ 5 lịch hẹn!");
+                    alert("❌ Maximum appointment reach for the day!");
                     return;
                 }
 
@@ -133,7 +134,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const time = $("select[name='appointment_time']").val();
 
         if (!time) {
-            alert("❌ Vui lòng chọn giờ hẹn!");
+            alert("❌ Please choose an appointment time!");
             return;
         }
         
@@ -147,18 +148,18 @@ document.addEventListener("DOMContentLoaded", async function () {
             type: "POST",
             data: $.param(formData),
             success: function () {
-                alert("✅ Đặt lịch thành công!");
+                alert("✅ Successfully apply!");
                 $("#appointmentModal").modal("hide");
                 $("#appointmentForm")[0].reset();
                 calendar.refetchEvents();
             },
             error: function (xhr) {
-            let msg = "❌ Lỗi khi đặt lịch!";
+            let msg = "❌ Can't make an appointment!";
             try {
                 const res = JSON.parse(xhr.responseText);
                 if (res.message) msg = res.message;
             } catch (e) {
-                console.warn("❌ Lỗi phân tích phản hồi:", e);
+                console.warn("❌ Error:", e);
             }
             alert(msg);
             }
@@ -177,7 +178,7 @@ async function fetchDisabledDates() {
         const serverDisabledDates = await response.json();
         return [...new Set([...serverDisabledDates, ...holidays])];
     } catch (error) {
-        console.error("❌ Lỗi khi tải danh sách ngày bị chặn:", error);
+        console.error("❌ Fetch dates fail:", error);
         return holidays;
     }
 }
@@ -191,7 +192,7 @@ async function getAppointmentCountForDate(date) {
         const data = await response.json();
         return data.count || 0;
     } catch (error) {
-        console.error("❌ Lỗi khi kiểm tra số lịch:", error);
+        console.error("❌ Fail checking number of day:", error);
         return 0;
     }
 }

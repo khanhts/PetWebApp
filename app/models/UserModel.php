@@ -13,7 +13,7 @@ class UserModel {
         $this->conn = $db;
     }
 
-    // Create a new user
+    
     public function createUser($fullname, $email, $password, $phone, $address, $role): bool {
         $stmt = $this->conn->prepare("
             INSERT INTO {$this->table_name} (fullname, email, password, phone, address, role)
@@ -28,7 +28,7 @@ class UserModel {
         return $stmt->execute();
     }
 
-    // Get a user by email
+    
     public function getUserByEmail(string $email): ?array {
         $stmt = $this->conn->prepare("
             SELECT users.id, users.email, users.password, users.fullname, users.phone, users.address,role.name AS role_name
@@ -42,7 +42,7 @@ class UserModel {
         return $user ?: null;
     }
 
-    // Update user details
+    
     public function updateUser($id, $email, $fullname, $gender, $birthYear, $role, $status) {
         $sql = "UPDATE {$this->table_name} SET email = :email, fullname = :fullname, gender = :gender, 
                 birth_year = :birth_year, role = :role, status = :status, updated_at = CURRENT_TIMESTAMP 
@@ -59,13 +59,13 @@ class UserModel {
 
         try {
             $stmt->execute();
-            return $stmt->rowCount(); // Return the number of affected rows
+            return $stmt->rowCount(); 
         } catch (Exception $e) {
             die("Error updating user: " . $e->getMessage());
         }
     }
 
-    // Delete a user
+    
     public function deleteUser($id) {
         $sql = "DELETE FROM {$this->table_name} WHERE id = :id";
         
@@ -74,20 +74,20 @@ class UserModel {
 
         try {
             $stmt->execute();
-            return $stmt->rowCount(); // Return the number of affected rows
+            return $stmt->rowCount(); 
         } catch (Exception $e) {
             die("Error deleting user: " . $e->getMessage());
         }
     }
 
-    // List all users (for example, in admin dashboard)
+    
     public function getAllUsers() {
         $sql = "SELECT * FROM {$this->table_name}";
         
         $stmt = $this->conn->query($sql);
 
         try {
-            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Return all users as an array of associative arrays
+            return $stmt->fetchAll(PDO::FETCH_ASSOC); 
         } catch (Exception $e) {
             die("Error fetching users: " . $e->getMessage());
         }

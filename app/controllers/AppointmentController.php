@@ -64,7 +64,7 @@ class AppointmentController {
         }
     }
 
-    // ✅ API: Đếm số lịch theo ngày
+    
     public function countByDate() {
         $date = $_GET['date'] ?? null;
         if (!$date) {
@@ -77,12 +77,12 @@ class AppointmentController {
     }
     
 
-    // ✅ Trang thông báo đặt lịch thành công
+    
     public function success() {
         include "views/appointments/success.php";
     }
 
-    // ✅ Nhận dữ liệu từ form modal (AJAX)
+    
     public function add() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $database = new Database();
@@ -92,22 +92,22 @@ class AppointmentController {
             $data = [
                 'pet_info' => $_POST['pet'],
                 'user_id' => $_POST['user_id'],
-                'appointment_date' => $_POST['appointment_date'], // yyyy-mm-dd hh:mm:ss
-                'appointment_time' => $_POST['appointment_time'], // hh:mm
+                'appointment_date' => $_POST['appointment_date'], 
+                'appointment_time' => $_POST['appointment_time'], 
                 'context' => $_POST['reason']
             ];
     
             $dateOnly = substr($data['appointment_date'], 0, 10);
             $timeOnly = $data['appointment_time'];
     
-            // ❌ Kiểm tra trùng giờ
+            
             if ($appointment->isTimeSlotTaken($dateOnly, $timeOnly)) {
                 http_response_code(400);
                 echo json_encode(['message' => '❌ Giờ hẹn này đã có người đặt!']);
                 return;
             }
     
-            // ✅ Tạo lịch nếu không trùng
+            
             $result = $appointment->create($data);
     
             if ($result) {
@@ -119,7 +119,7 @@ class AppointmentController {
         }
     }
 
-// ✅ API: Lấy danh sách ngày bị chặn (đã đủ 5 lịch hẹn)
+
     public function getDisabledDates() {
         $stmt = $this->appointmentModel->getAll();
         $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -143,6 +143,41 @@ class AppointmentController {
 
         header('Content-Type: application/json');
         echo json_encode($disabledDates);
+    }
+
+    public function manage()
+    {
+        if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+            header('Location: /accessDenied'); 
+            exit;
+        }
+        
+        $search = $_GET['search'] ?? '';
+
+        
+        if (!empty($search)) {
+            $appointments = $this->appointmentModel->searchAppointments($search);
+        } else {
+            $appointments = $this->appointmentModel->getAll();
+        }
+
+        
+        include __DIR__ . '/../views/admin/appointment-management.php';
+    }
+
+    public function myAppointments()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /login'); 
+            exit;
+        }
+
+        
+        $userId = $_SESSION['user_id'];
+        $appointments = $this->appointmentModel->getAppointmentsByUserId($userId);
+
+        
+        include __DIR__ . '/../views/appointments/my-appointments.php';
     }
 }
 ?>
